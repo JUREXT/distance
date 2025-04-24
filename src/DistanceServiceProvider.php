@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TeamChallengeApps\Distance;
 
 use Illuminate\Support\ServiceProvider;
@@ -7,24 +9,28 @@ use Illuminate\Support\ServiceProvider;
 class DistanceServiceProvider extends ServiceProvider
 {
     /**
-     * {@inheritdoc}
+     * Register any application services.
      */
-    public function register()
+    public function register(): void
     {
         $this->setupConfig();
     }
 
     /**
-     * Setup the package config.
+     * Setup the package configuration.
      */
-    protected function setupConfig()
+    protected function setupConfig(): void
     {
-        $config = realpath(__DIR__.'/config/config.php');
+        $configPath = realpath(__DIR__ . '/config/config.php');
 
-        $this->mergeConfigFrom($config, 'distance');
+        if ($configPath === false) {
+            throw new \RuntimeException('Distance configuration file not found.');
+        }
+
+        $this->mergeConfigFrom($configPath, 'distance');
 
         $this->publishes([
-            $config => app()->configPath('distance.php'),
+            $configPath => config_path('distance.php'),
         ], 'config');
     }
 }

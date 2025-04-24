@@ -1,141 +1,124 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Collection;
 use TeamChallengeApps\Distance\Distance;
 use PHPUnit\Framework\TestCase;
 
-class DistanceTest extends TestCase
+final class DistanceTest extends TestCase
 {
-    /** @test */
-    public function it_creates_distance()
+    public function test_it_creates_distance(): void
     {
         $distance = new Distance(1);
         $distance = $this->loadConfig($distance);
 
-        $this->assertEquals($distance->value, 1);
-        $this->assertEquals($distance->unit, 'meters');
+        $this->assertSame(1.0, $distance->value);
+        $this->assertSame('meters', $distance->unit);
     }
 
-    /** @test **/
-    public function it_converts_to_kilometers()
+    public function test_it_converts_to_kilometers(): void
     {
         $map = new Collection([
-            '1000' => 1,
-            '1500' => 1.5,
-            '2750' => 2.75,
+            1000 => 1.0,
+            1500 => 1.5,
+            2750 => 2.75,
         ]);
 
         foreach ($map as $meters => $km) {
-            $distance = new Distance($meters);
-            $distance = $this->loadConfig($distance);
+            $distance = new Distance((float) $meters);
+            $distance = $this->loadConfig($distance)->toKilometers();
 
-            $distance = $distance->toKilometers();
-
-            $this->assertEquals($distance->value, $km);
+            $this->assertSame($km, $distance->value);
         }
     }
 
-    /** @test **/
-    public function it_converts_from_kilometers()
+    public function test_it_converts_from_kilometers(): void
     {
         $map = new Collection([
-            '1' => 1000,
-            '1.5' => 1500,
-            '2.75' => 2750,
+            1.0 => 1000,
+            1.5 => 1500,
+            2.75 => 2750,
         ]);
 
         foreach ($map as $km => $meters) {
             $distance = new Distance((float) $km, 'kilometers');
-            $distance = $this->loadConfig($distance);
+            $distance = $this->loadConfig($distance)->toMeters();
 
-            $distance = $distance->toMeters();
-
-            $this->assertEquals($distance->value, $meters);
+            $this->assertSame($meters, $distance->value);
         }
     }
 
-    /** @test **/
-    public function it_converts_to_miles()
+    public function test_it_converts_to_miles(): void
     {
         $map = new Collection([
-            '1000' => 0.62,
-            '1500' => 0.93,
-            '2750' => 1.71,
+            1000 => 0.62,
+            1500 => 0.93,
+            2750 => 1.71,
         ]);
 
         foreach ($map as $meters => $miles) {
-            $distance = new Distance($meters);
-            $distance = $this->loadConfig($distance);
+            $distance = new Distance((float) $meters);
+            $distance = $this->loadConfig($distance->toMiles());
 
-            $distance = $distance->toMiles();
-            $distance = $this->loadConfig($distance);
-
-            $this->assertEquals($distance->round(), $miles);
+            $this->assertSame($miles, $distance->round());
         }
     }
 
-    /** @test **/
-    public function it_converts_to_steps()
+    public function test_it_converts_to_steps(): void
     {
         $map = new Collection([
-            '1' => 1,
-            '1000' => 1458,
-            '1500' => 2187,
-            '2750' => 4010,
+            1 => 1,
+            1000 => 1458,
+            1500 => 2187,
+            2750 => 4010,
         ]);
 
         foreach ($map as $meters => $steps) {
-            $distance = new Distance($meters);
-            $distance = $this->loadConfig($distance);
+            $distance = new Distance((float) $meters);
+            $distance = $this->loadConfig($distance->toSteps());
 
-            $distance = $distance->toSteps();
-            $distance = $this->loadConfig($distance);
-
-            $this->assertEquals($distance->round(), $steps);
+            $this->assertSame($steps, $distance->round());
         }
     }
 
-    /** @test **/
-    public function it_formats_to_string_automatically()
+    public function test_it_formats_to_string_automatically(): void
     {
         $meters = 10000;
 
-        $distance = new Distance(10000);
+        $distance = new Distance((float) $meters);
         $distance = $this->loadConfig($distance);
 
         $string = number_format($meters, 2, '.', ',');
 
-        $this->assertEquals((string) $distance, $string);
+        $this->assertSame($string, (string) $distance);
     }
 
-    /** @test **/
-    public function it_formats_to_steps_string_without_decimals()
+    public function test_it_formats_to_steps_string_without_decimals(): void
     {
         $meters = 10000;
 
-        $distance = new Distance(10000, 'footsteps');
+        $distance = new Distance((float) $meters, 'footsteps');
         $distance = $this->loadConfig($distance);
 
         $string = number_format($meters, 0, '.', ',');
 
-        $this->assertEquals((string) $distance, $string);
+        $this->assertSame($string, (string) $distance);
     }
 
-    /** @test **/
-    public function it_formats_to_steps_string_with_suffix()
+    public function test_it_formats_to_steps_string_with_suffix(): void
     {
         $meters = 10000;
 
-        $distance = new Distance(10000, 'footsteps');
+        $distance = new Distance((float) $meters, 'footsteps');
         $distance = $this->loadConfig($distance);
 
         $string = number_format($meters, 0, '.', ',') . ' steps';
 
-        $this->assertEquals($distance->toStringWithSuffix(), $string);
+        $this->assertSame($string, $distance->toStringWithSuffix());
     }
 
-    /** @test **/
-    public function it_allows_global_distance_function()
+    public function test_it_allows_global_distance_function(): void
     {
         $distance = new Distance(1000);
         $helper = distance_value(1000);
@@ -143,84 +126,76 @@ class DistanceTest extends TestCase
         $this->assertEquals($distance, $helper);
     }
 
-    /** @test **/
-    public function it_converts_to_unit_value()
+    public function test_it_converts_to_unit_value(): void
     {
-        $distance = new Distance(1000);
-
         $map = new Collection([
-            '1000' => 1,
-            '1500' => 1.5,
-            '2750' => 2.75,
+            1000 => 1.0,
+            1500 => 1.5,
+            2750 => 2.75,
         ]);
 
         foreach ($map as $meters => $km) {
-            $distance = new Distance($meters);
+            $distance = new Distance((float) $meters);
             $distance = $this->loadConfig($distance);
 
-            $this->assertEquals($distance->asUnit('kilometers'), $km);
+            $this->assertSame($km, $distance->asUnit('kilometers'));
         }
     }
 
-    /** @test **/
-    public function it_calculates_percentages()
+    public function test_it_calculates_percentages(): void
     {
         $distance = $this->loadConfig(new Distance(250));
         $total = $this->loadConfig(new Distance(1000));
 
         $percentage = $distance->percentageOf($total);
 
-        $this->assertEquals($percentage, 25);
+        $this->assertSame(25, $percentage);
     }
 
-    /** @test **/
-    public function it_overflows_percentages_by_default()
+    public function test_it_overflows_percentages_by_default(): void
     {
         $distance = $this->loadConfig(new Distance(1500));
         $total = $this->loadConfig(new Distance(1000));
 
         $percentage = $distance->percentageOf($total);
 
-        $this->assertEquals($percentage, 150);
+        $this->assertSame(150, $percentage);
     }
 
-    /** @test **/
-    public function it_caps_percentage_at_100()
+    public function test_it_caps_percentage_at_100(): void
     {
         $distance = $this->loadConfig(new Distance(1500));
         $total = $this->loadConfig(new Distance(1000));
 
         $percentage = $distance->percentageOf($total, false);
 
-        $this->assertEquals($percentage, 100);
+        $this->assertSame(100, $percentage);
     }
 
-    /** @test **/
-    public function it_decrements_distance()
+    public function test_it_decrements_distance(): void
     {
         $distance = $this->loadConfig(new Distance(1500));
         $subtract = $this->loadConfig(new Distance(500));
 
         $distance->decrement($subtract);
 
-        $this->assertEquals($distance->value, 1000);
+        $this->assertSame(1000.0, $distance->value);
     }
 
-    /** @test **/
-    public function it_stays_clean_after_copying()
+    public function test_it_stays_clean_after_copying(): void
     {
         $distance = $this->loadConfig(new Distance(1500));
         $subtract = $this->loadConfig(new Distance(500));
 
         $after = $distance->copy()->decrement($subtract);
 
-        $this->assertEquals($distance->value, 1500);
-        $this->assertEquals($after->value, 1000);
+        $this->assertSame(1500.0, $distance->value);
+        $this->assertSame(1000.0, $after->value);
     }
 
-    protected function loadConfig(Distance $distance)
+    protected function loadConfig(Distance $distance): Distance
     {
-        $config = include __DIR__.'/../src/config/config.php';
+        $config = require __DIR__ . '/../src/config/config.php';
 
         return $distance->setConfig($config);
     }

@@ -6,4 +6,5 @@ use Illuminate\Support\Collection;
 
 class DistanceCollection extends Collection
 {
+    // Ignore.
 }
