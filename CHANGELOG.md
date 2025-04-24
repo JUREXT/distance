@@ -1,5 +1,9 @@
 # Change Log
-All notable changes to this packge will be documented in this file.
+All notable changes to this package will be documented in this file.
+
+## [1.4.0] - 2025-04-24
+### Changed
+- Updated to Laravel 12 compatibility and PHP version 8.3.
 
 ## [1.3.0] - 2023-04-03
 ### Changed
